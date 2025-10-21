@@ -6,9 +6,10 @@ import { Skeleton } from './ui/skeleton';
 
 interface TemplateCardProps {
   template: Template;
+  thumbnail?: string;
 }
 
-export function TemplateCard({ template }: TemplateCardProps) {
+export function TemplateCard({ template, thumbnail }: TemplateCardProps) {
   const navigate = useNavigate();
 
   const layoutLabels = {
@@ -23,14 +24,26 @@ export function TemplateCard({ template }: TemplateCardProps) {
       className="group cursor-pointer hover:shadow-lg transition-shadow overflow-hidden"
       onClick={() => navigate(`/builder/${template.id}`)}
     >
-      <div className="aspect-[8.5/11] bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
-        {/* Placeholder thumbnail - in a real app, this would be an actual image */}
-        <div
-          className="absolute inset-0 flex items-center justify-center text-6xl font-bold opacity-10"
-          style={{ color: template.theme.primary }}
-        >
-          CV
-        </div>
+      <div className="aspect-[596/842] bg-muted relative overflow-hidden rounded-t-xl">
+        {thumbnail ? (
+          <img
+            src={thumbnail}
+            alt={`Preview of ${template.name} CV template`}
+            loading="lazy"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          // Fallback placeholder
+          <>
+            <div
+              className="absolute inset-0 flex items-center justify-center text-6xl font-bold opacity-10"
+              style={{ color: template.theme.primary }}
+            >
+              CV
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-br from-muted to-muted/50" />
+          </>
+        )}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
           <div className="flex gap-2">
             <Badge variant="secondary" className="text-xs">

@@ -3,18 +3,29 @@ import { useCvStore } from '@/stores/cv';
 import { TemplateCard } from '@/components/TemplateCard';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Search } from 'lucide-react';
+import { useTemplateThumbnails } from '@/hooks/useTemplateThumbnails';
 
 export function Templates() {
   const { templates, loadDemoTemplates } = useCvStore();
   const [search, setSearch] = useState('');
   const [layoutFilter, setLayoutFilter] = useState<string | null>(null);
+  
+  const { getThumbnail, isLoading, prewarmAll } = useTemplateThumbnails(templates);
 
   useEffect(() => {
     if (templates.length === 0) {
       loadDemoTemplates();
     }
   }, [templates.length, loadDemoTemplates]);
+
+  useEffect(() => {
+    if (templates.length > 0) {
+      // Prewarm all thumbnails on mount
+      prewarmAll(templates);
+    }
+  }, [templates, prewarmAll]);
 
   const filteredTemplates = templates.filter((template) => {
     const matchesSearch = template.name.toLowerCase().includes(search.toLowerCase());
@@ -80,9 +91,30 @@ export function Templates() {
         {/* Templates Grid */}
         {filteredTemplates.length > 0 ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredTemplates.map((template) => (
-              <TemplateCard key={template.id} template={template} />
-            ))}
+            {filteredTemplates.map((template) => {
+              const thumbnail = getThumbnail(template);
+              const loading = isLoading(template);
+
+              return (
+                <div key={template.id}>
+                  {loading || !thumbnail ? (
+                    <div className="border rounded-lg overflow-hidden bg-card">
+                      <Skeleton className="aspect-[596/842] w-full" />
+                      <div className="p-4">
+                        <Skeleton className="h-6 w-3/4 mb-2" />
+                        <Skeleton className="h-4 w-full mb-1" />
+                        <Skeleton className="h-4 w-2/3" />
+                      </div>
+                    </div>
+                  ) : (
+                    <TemplateCard 
+                      template={template}
+                      thumbnail={thumbnail}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-12">

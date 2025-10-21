@@ -26,7 +26,7 @@ export function AuthDialog({ open, onClose, mode: initialMode = 'signin', redire
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuthStore();
+  const { signIn, signUp, redirectTo: storedRedirectTo, setRedirectTo } = useAuthStore();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
@@ -45,9 +45,10 @@ export function AuthDialog({ open, onClose, mode: initialMode = 'signin', redire
 
       onClose();
       
-      if (redirectTo) {
-        navigate(redirectTo);
-      }
+      // Navigate to redirectTo prop, or stored redirectTo, or default to /dashboard
+      const targetPath = redirectTo || storedRedirectTo || '/dashboard';
+      setRedirectTo(null); // Clear stored redirect
+      navigate(targetPath, { replace: true });
     } catch (error) {
       addToast('Something went wrong. Please try again.', 'error');
     } finally {

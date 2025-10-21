@@ -8,6 +8,19 @@ import { AuthDialog } from '@/components/AuthDialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   Download,
   Share2,
   Save,
@@ -15,8 +28,10 @@ import {
   Edit,
   ArrowLeft,
   LayoutTemplate,
+  FileImage,
+  FileText,
 } from 'lucide-react';
-import { downloadCvAsPdf } from '@/lib/pdf';
+import { exportPdfA4, exportJpeg, exportDocx } from '@/lib/pdf';
 
 export function Result() {
   const { docId } = useParams<{ docId: string }>();
@@ -26,7 +41,14 @@ export function Result() {
   const { addToast } = useToast();
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const [showDownloadPrompt, setShowDownloadPrompt] = useState(false);
+  const [showAuthMode, setShowAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [showSaveShareModal, setShowSaveShareModal] = useState(false);
+  const [modalAction, setModalAction] = useState<'save' | 'share'>('save');
+
+  // Check if user dismissed the download prompt in this session
+  const [downloadPromptDismissed, setDownloadPromptDismissed] = useState(
+    sessionStorage.getItem('downloadPromptDismissed') === 'true'
+  );
 
   useEffect(() => {
     if (templates.length === 0) {
@@ -58,31 +80,57 @@ export function Result() {
     );
   }
 
-  const handleDownload = async () => {
-    if (!user) {
-      setShowDownloadPrompt(true);
-      // Still allow download after showing prompt
-      setTimeout(() => {
-        proceedWithDownload();
-      }, 100);
-      return;
-    }
+  const cvElement = () => document.getElementById('cv-a4');
+  const fileName = (ext: string) => `CV-${activeDoc.personal.fullName.replace(/\s+/g, '-') || 'document'}.${ext}`;
+
+  const handleDownloadPdf = async () => {
+    const el = cvElement();
+    if (!el) return;
     
-    proceedWithDownload();
+    try {
+      await exportPdfA4(el, fileName('pdf'));
+      addToast('CV downloaded as PDF!', 'success');
+      
+      // Show prompt to guests only once per session
+      if (!user && !downloadPromptDismissed) {
+        setTimeout(() => {
+          setShowSaveShareModal(true);
+          setModalAction('save');
+        }, 500);
+      }
+    } catch (error) {
+      addToast('Failed to download PDF. Please try again.', 'error');
+    }
   };
 
-  const proceedWithDownload = async () => {
+  const handleDownloadJpeg = async () => {
+    const el = cvElement();
+    if (!el) return;
+    
     try {
-      await downloadCvAsPdf('cv-preview', `${activeDoc.title || 'cv'}.pdf`);
-      addToast('CV downloaded successfully!', 'success');
+      await exportJpeg(el, fileName('jpeg'));
+      addToast('CV downloaded as JPEG!', 'success');
     } catch (error) {
-      addToast('Failed to download CV. Please try again.', 'error');
+      addToast('Failed to download JPEG. Please try again.', 'error');
+    }
+  };
+
+  const handleDownloadDocx = async () => {
+    const el = cvElement();
+    if (!el) return;
+    
+    try {
+      await exportDocx(el, fileName('docx'));
+      addToast('CV downloaded as DOCX!', 'success');
+    } catch (error) {
+      addToast('Failed to download DOCX. Please try again.', 'error');
     }
   };
 
   const handleShare = () => {
     if (!user) {
-      setShowAuthDialog(true);
+      setModalAction('share');
+      setShowSaveShareModal(true);
       return;
     }
 
@@ -91,7 +139,8 @@ export function Result() {
 
   const handleSave = () => {
     if (!user) {
-      setShowAuthDialog(true);
+      setModalAction('save');
+      setShowSaveShareModal(true);
       return;
     }
 
@@ -106,6 +155,12 @@ export function Result() {
 
   const handleEdit = () => {
     navigate(`/builder/${template.id}`);
+  };
+
+  const dismissDownloadPrompt = () => {
+    sessionStorage.setItem('downloadPromptDismissed', 'true');
+    setDownloadPromptDismissed(true);
+    setShowSaveShareModal(false);
   };
 
   return (
@@ -149,10 +204,28 @@ export function Result() {
           <div className="max-w-5xl mx-auto">
             {/* Action Buttons */}
             <div className="mb-8 flex flex-wrap gap-4 justify-center print-hide">
-              <Button size="lg" onClick={handleDownload} className="min-w-[150px]">
-                <Download className="mr-2 h-5 w-5" />
-                Download PDF
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button size="lg" className="min-w-[150px]">
+                    <Download className="mr-2 h-5 w-5" />
+                    Download
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={handleDownloadPdf}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleDownloadDocx}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    DOCX
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleDownloadJpeg}>
+                    <FileImage className="mr-2 h-4 w-4" />
+                    JPEG
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button
                 size="lg"
                 variant="outline"
@@ -201,39 +274,53 @@ export function Result() {
       <AuthDialog
         open={showAuthDialog}
         onClose={() => setShowAuthDialog(false)}
+        mode={showAuthMode}
         redirectTo={`/result/${docId}`}
       />
 
-      {/* Download Prompt for Guests */}
-      {showDownloadPrompt && !user && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 print-hide">
-          <div className="bg-background p-8 rounded-2xl max-w-md mx-4 shadow-xl">
-            <h3 className="text-xl font-bold mb-4">Download Starting...</h3>
-            <p className="text-muted-foreground mb-6">
-              Your CV is being downloaded! Create a free account to save your CV and avoid
-              re-typing next time. You'll also be able to share it online.
-            </p>
-            <div className="flex gap-3">
-              <Button
-                onClick={() => {
-                  setShowDownloadPrompt(false);
-                  setShowAuthDialog(true);
-                }}
-                className="flex-1"
-              >
-                Create Account
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowDownloadPrompt(false)}
-                className="flex-1"
-              >
-                Continue as Guest
-              </Button>
-            </div>
+      {/* Save/Share Modal for Guests */}
+      <Dialog open={showSaveShareModal} onOpenChange={setShowSaveShareModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create a free account to {modalAction === 'save' ? 'save' : 'share'}</DialogTitle>
+            <DialogDescription>
+              {modalAction === 'save' 
+                ? 'Save your CV to your account and access it anytime, anywhere. You can also share it with a link and track views.'
+                : 'Create an account to generate shareable links for your CV and track who views it.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 mt-4">
+            <Button
+              onClick={() => {
+                setShowSaveShareModal(false);
+                setShowAuthMode('signup');
+                setShowAuthDialog(true);
+              }}
+              className="w-full"
+            >
+              Sign up
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowSaveShareModal(false);
+                setShowAuthMode('signin');
+                setShowAuthDialog(true);
+              }}
+              className="w-full"
+            >
+              Sign in
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={dismissDownloadPrompt}
+              className="w-full"
+            >
+              Continue as guest
+            </Button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

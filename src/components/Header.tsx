@@ -60,7 +60,7 @@ export function Header() {
 
           <div className="flex items-center gap-3">
             <Button asChild className="hidden sm:inline-flex">
-              <Link to="/templates">Start Here</Link>
+              <Link to="/templates">{user ? 'Create New' : 'Start Here'}</Link>
             </Button>
 
             {user ? (
@@ -105,7 +105,7 @@ export function Header() {
             ) : (
               <Button variant="outline" onClick={() => setShowAuthDialog(true)}>
                 <User className="mr-2 h-4 w-4" />
-                Sign In
+                Sign in / Sign up
               </Button>
             )}
           </div>

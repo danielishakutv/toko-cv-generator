@@ -6,20 +6,26 @@ export interface User {
   name: string;
   email: string;
   avatarUrl?: string;
+  location?: string;
+  role?: string;
 }
 
 interface AuthState {
   user: User | null;
+  redirectTo: string | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
   signOut: () => void;
   requireAuth: (actionName?: string) => boolean;
+  updateUser: (updates: Partial<User>) => void;
+  setRedirectTo: (path: string | null) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       user: null,
+      redirectTo: null,
 
       signIn: async (email: string, _password: string) => {
         // Simulate API delay
@@ -60,6 +66,17 @@ export const useAuthStore = create<AuthState>()(
           console.log(`Authentication required for: ${actionName}`);
         }
         return !!user;
+      },
+
+      updateUser: (updates: Partial<User>) => {
+        const { user } = get();
+        if (user) {
+          set({ user: { ...user, ...updates } });
+        }
+      },
+
+      setRedirectTo: (path: string | null) => {
+        set({ redirectTo: path });
       },
     }),
     {

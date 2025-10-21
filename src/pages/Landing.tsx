@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useSettingsStore } from '@/stores/settings';
+import { formatPrice } from '@/lib/format';
 import {
   FileText,
   Eye,
@@ -15,6 +17,52 @@ import {
 } from 'lucide-react';
 
 export function Landing() {
+  const { currency } = useSettingsStore();
+
+  const pricingPlans = [
+    {
+      name: 'Free',
+      price: 0,
+      features: [
+        { text: 'Create unlimited CVs', included: true },
+        { text: 'Access to 3 templates', included: true },
+        { text: 'Download as PDF', included: true },
+        { text: 'Save & share CVs', included: false },
+      ],
+      cta: 'Get Started',
+      ctaVariant: 'outline' as const,
+      popular: false,
+    },
+    {
+      name: 'Pro',
+      price: 14400, // NGN 14,400 (USD 9)
+      features: [
+        { text: 'Everything in Free', included: true },
+        { text: 'Access to all 9+ templates', included: true },
+        { text: 'Save & share CVs', included: true },
+        { text: 'Version history', included: true },
+        { text: 'Priority support', included: true },
+      ],
+      cta: 'Start Free Trial',
+      ctaVariant: 'default' as const,
+      popular: true,
+    },
+    {
+      name: 'Team',
+      price: 46400, // NGN 46,400 (USD 29)
+      features: [
+        { text: 'Everything in Pro', included: true },
+        { text: 'Up to 10 team members', included: true },
+        { text: 'Shared templates', included: true },
+        { text: 'Team analytics', included: true },
+        { text: 'Dedicated support', included: true },
+      ],
+      cta: 'Contact Sales',
+      ctaVariant: 'outline' as const,
+      popular: false,
+    },
+  ];
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -137,116 +185,47 @@ export function Landing() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Free */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">Free</CardTitle>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold">$0</span>
-                  <span className="text-muted-foreground">/forever</span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Create unlimited CVs</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Access to 3 templates</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Download as PDF</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-muted-foreground">
-                    <span className="text-xl">×</span>
-                    <span>Save & share CVs</span>
-                  </li>
-                </ul>
-                <Button className="w-full mt-6" variant="outline" asChild>
-                  <Link to="/templates">Get Started</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Pro */}
-            <Card className="border-primary shadow-lg relative">
-              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">Most Popular</Badge>
-              <CardHeader>
-                <CardTitle className="text-2xl">Pro</CardTitle>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold">$9</span>
-                  <span className="text-muted-foreground">/month</span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Everything in Free</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Access to all 9+ templates</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Save & share CVs</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Version history</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Priority support</span>
-                  </li>
-                </ul>
-                <Button className="w-full mt-6" asChild>
-                  <Link to="/templates">Start Free Trial</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Team */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">Team</CardTitle>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold">$29</span>
-                  <span className="text-muted-foreground">/month</span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Everything in Pro</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Up to 10 team members</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Shared templates</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Team analytics</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Dedicated support</span>
-                  </li>
-                </ul>
-                <Button className="w-full mt-6" variant="outline" asChild>
-                  <Link to="/templates">Contact Sales</Link>
-                </Button>
-              </CardContent>
-            </Card>
+            {pricingPlans.map((plan) => (
+              <Card 
+                key={plan.name} 
+                className={plan.popular ? 'border-primary shadow-lg relative' : ''}
+              >
+                {plan.popular && (
+                  <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">Most Popular</Badge>
+                )}
+                <CardHeader>
+                  <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                  <div className="mt-4">
+                    <span className="text-4xl font-bold">
+                      {plan.price === 0 ? 'Free' : formatPrice(plan.price, currency)}
+                    </span>
+                    {plan.price > 0 && (
+                      <span className="text-muted-foreground">/month</span>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {plan.features.map((feature, idx) => (
+                      <li 
+                        key={idx} 
+                        className={`flex items-start gap-2 ${!feature.included ? 'text-muted-foreground' : ''}`}
+                      >
+                        {feature.included ? (
+                          <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                        ) : (
+                          <span className="text-xl">×</span>
+                        )}
+                        <span>{feature.text}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Button className="w-full mt-6" variant={plan.ctaVariant} asChild>
+                    <Link to="/templates">{plan.cta}</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>

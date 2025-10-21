@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TemplateCard } from '@/components/TemplateCard';
+import { ProfileAlert } from '@/components/ProfileAlert';
 import { FileText, Share2, Download, Plus, Edit, Copy, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
@@ -72,6 +73,9 @@ export function Dashboard() {
             Manage your CVs and create new ones from professional templates
           </p>
         </div>
+
+        {/* Profile Completeness Alert */}
+        <ProfileAlert />
 
         {/* Stats */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
