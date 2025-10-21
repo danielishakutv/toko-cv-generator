@@ -13,55 +13,89 @@ const A4_HEIGHT_PX = 1754;
 
 /**
  * Export CV as PDF with A4 sizing and compression to keep file under 1MB
+ * Supports multi-page layouts by detecting .a4-page elements
  */
 export async function exportPdfA4(element: HTMLElement, filename: string = 'cv.pdf'): Promise<void> {
   try {
-    let quality = 0.72;
-    let canvasWidth = A4_WIDTH_PX;
-    let canvasHeight = A4_HEIGHT_PX;
-    let pdfBlob: Blob | null = null;
+    // Check if element has multiple pages
+    const pages = element.querySelectorAll('.a4-page');
+    const isMultiPage = pages.length > 0;
 
-    // Try to compress until file size is under 1MB
-    while (quality >= 0.5) {
-      const dataUrl = await toJpeg(element, {
-        quality,
-        canvasWidth,
-        canvasHeight,
-        backgroundColor: '#ffffff',
-        cacheBust: true,
-      });
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'pt',
+      format: 'a4',
+      compress: true,
+    });
 
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'pt',
-        format: 'a4',
-        compress: true,
-      });
+    if (isMultiPage) {
+      // Multi-page export: render each .a4-page separately
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i] as HTMLElement;
+        
+        // Add new page if not the first one
+        if (i > 0) {
+          pdf.addPage();
+        }
 
-      pdf.addImage(dataUrl, 'JPEG', 0, 0, A4_WIDTH_PT, A4_HEIGHT_PT, undefined, 'FAST');
-      pdfBlob = pdf.output('blob');
+        // Render page with compression
+        let quality = 0.72;
+        const dataUrl = await toJpeg(page, {
+          quality,
+          canvasWidth: A4_WIDTH_PX,
+          canvasHeight: A4_HEIGHT_PX,
+          backgroundColor: '#ffffff',
+          cacheBust: true,
+        });
 
-      // Check file size (1MB = 1048576 bytes)
-      if (pdfBlob.size <= 1048576) {
-        break;
+        pdf.addImage(dataUrl, 'JPEG', 0, 0, A4_WIDTH_PT, A4_HEIGHT_PT, undefined, 'FAST');
       }
+    } else {
+      // Single-page export: use original compression logic
+      let quality = 0.72;
+      let canvasWidth = A4_WIDTH_PX;
+      let canvasHeight = A4_HEIGHT_PX;
+      let pdfBlob: Blob | null = null;
 
-      // Reduce quality for next iteration
-      if (quality > 0.65) {
-        quality = 0.65;
-      } else if (quality > 0.5) {
-        quality = 0.5;
-        // Also reduce resolution
-        canvasWidth = 992;
-        canvasHeight = 1404;
-      } else {
-        break;
+      // Try to compress until file size is under 1MB
+      while (quality >= 0.5) {
+        const dataUrl = await toJpeg(element, {
+          quality,
+          canvasWidth,
+          canvasHeight,
+          backgroundColor: '#ffffff',
+          cacheBust: true,
+        });
+
+        pdf.addImage(dataUrl, 'JPEG', 0, 0, A4_WIDTH_PT, A4_HEIGHT_PT, undefined, 'FAST');
+        pdfBlob = pdf.output('blob');
+
+        // Check file size (1MB = 1048576 bytes)
+        if (pdfBlob.size <= 1048576) {
+          break;
+        }
+
+        // Reduce quality for next iteration
+        if (quality > 0.65) {
+          quality = 0.65;
+        } else if (quality > 0.5) {
+          quality = 0.5;
+          // Also reduce resolution
+          canvasWidth = 992;
+          canvasHeight = 1404;
+        } else {
+          break;
+        }
+
+        // Reset PDF for next attempt (single page only)
+        if (quality >= 0.5) {
+          pdf.deletePage(1);
+        }
       }
     }
 
-    if (pdfBlob) {
-      saveAs(pdfBlob, filename);
-    }
+    const pdfBlob = pdf.output('blob');
+    saveAs(pdfBlob, filename);
   } catch (error) {
     console.error('Error generating PDF:', error);
     throw error;
@@ -70,10 +104,15 @@ export async function exportPdfA4(element: HTMLElement, filename: string = 'cv.p
 
 /**
  * Export CV as JPEG image
+ * For multi-page CVs, exports only the first page
  */
 export async function exportJpeg(element: HTMLElement, filename: string = 'cv.jpeg'): Promise<void> {
   try {
-    const dataUrl = await toJpeg(element, {
+    // Check if element has multiple pages
+    const pages = element.querySelectorAll('.a4-page');
+    const targetElement = pages.length > 0 ? (pages[0] as HTMLElement) : element;
+
+    const dataUrl = await toJpeg(targetElement, {
       quality: 0.9,
       canvasWidth: A4_WIDTH_PX,
       canvasHeight: A4_HEIGHT_PX,
@@ -92,46 +131,64 @@ export async function exportJpeg(element: HTMLElement, filename: string = 'cv.jp
 }
 
 /**
- * Export CV as DOCX with embedded image
- * Simple approach: embeds the CV as an image in an A4 document
+ * Export CV as DOCX with embedded image(s)
+ * Supports multi-page layouts by embedding each page as a separate image
  */
 export async function exportDocx(element: HTMLElement, filename: string = 'cv.docx'): Promise<void> {
   try {
-    // Generate PNG image of the CV
-    const dataUrl = await toPng(element, {
-      quality: 1,
-      canvasWidth: A4_WIDTH_PX,
-      canvasHeight: A4_HEIGHT_PX,
-      backgroundColor: '#ffffff',
-      cacheBust: true,
-    });
+    // Check if element has multiple pages
+    const pages = element.querySelectorAll('.a4-page');
+    const isMultiPage = pages.length > 0;
+    const pagesToExport = isMultiPage ? Array.from(pages) as HTMLElement[] : [element];
 
-    // Convert data URL to array buffer
-    const response = await fetch(dataUrl);
-    const blob = await response.blob();
-    const arrayBuffer = await blob.arrayBuffer();
+    const sections = [];
 
-    // Create DOCX with embedded image
-    const doc = new Document({
-      sections: [
-        {
-          properties: {},
-          children: [
-            new Paragraph({
-              children: [
-                new ImageRun({
-                  data: arrayBuffer,
-                  transformation: {
-                    width: 595, // A4 width in points
-                    height: 842, // A4 height in points
-                  },
-                  type: 'png',
-                }),
-              ],
-            }),
-          ],
+    for (let i = 0; i < pagesToExport.length; i++) {
+      const page = pagesToExport[i];
+
+      // Generate PNG image of the page
+      const dataUrl = await toPng(page, {
+        quality: 1,
+        canvasWidth: A4_WIDTH_PX,
+        canvasHeight: A4_HEIGHT_PX,
+        backgroundColor: '#ffffff',
+        cacheBust: true,
+      });
+
+      // Convert data URL to array buffer
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+      const arrayBuffer = await blob.arrayBuffer();
+
+      // Create section with embedded image
+      sections.push({
+        properties: {
+          page: {
+            pageNumbers: {
+              start: i + 1,
+            },
+          },
         },
-      ],
+        children: [
+          new Paragraph({
+            children: [
+              new ImageRun({
+                data: arrayBuffer,
+                transformation: {
+                  width: 595, // A4 width in points
+                  height: 842, // A4 height in points
+                },
+                type: 'png',
+              }),
+            ],
+          }),
+        ],
+      });
+    }
+
+    // Create DOCX with embedded images
+    const doc = new Document({
+      sections,
     });
 
     // Generate and save DOCX
