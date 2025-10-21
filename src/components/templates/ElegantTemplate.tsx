@@ -270,15 +270,66 @@ export function ElegantTemplate({ data, template }: TemplateProps) {
               >
                 ACHIEVEMENTS
               </h3>
-              <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
+              <div className="space-y-3">
                 {data.achievements.map((achievement, idx) => (
-                  <li key={idx}>{achievement}</li>
+                  <div key={achievement.id || idx}>
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-semibold text-gray-900">{achievement.title}</h4>
+                      {achievement.year && (
+                        <span className="text-sm text-gray-500 whitespace-nowrap ml-4">
+                          {achievement.year}
+                        </span>
+                      )}
+                    </div>
+                    {achievement.detail && (
+                      <p className="text-sm text-gray-700 mt-1">{achievement.detail}</p>
+                    )}
+                  </div>
                 ))}
-              </ul>
+              </div>
             </section>
+          )}
+
+          {/* Custom Sections */}
+          {data.customSections && data.customSections.length > 0 && template.sections.includes('custom') && (
+            <>
+              {data.customSections.map((section, sIdx) => (
+                <section key={section.id || sIdx}>
+                  <h3
+                    className="text-lg font-bold mb-3 pb-2 border-b-2 uppercase"
+                    style={{ color: primaryColor, borderColor: primaryColor }}
+                  >
+                    {section.title}
+                  </h3>
+                  <div className="space-y-3">
+                    {section.items.map((item, iIdx) => (
+                      <div key={item.id || iIdx}>
+                        {item.heading && (
+                          <h4 className="font-bold text-gray-900">{item.heading}</h4>
+                        )}
+                        {item.sub && (
+                          <p className="text-gray-600">{item.sub}</p>
+                        )}
+                        {item.bullets && item.bullets.length > 0 && (
+                          <ul className="list-disc list-inside space-y-1 text-sm text-gray-700 mt-1">
+                            {item.bullets.map((bullet, bIdx) => (
+                              <li key={bIdx}>{bullet}</li>
+                            ))}
+                          </ul>
+                        )}
+                        {item.body && (
+                          <p className="text-sm text-gray-700 mt-1">{item.body}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </>
           )}
         </div>
       </main>
     </div>
   );
 }
+

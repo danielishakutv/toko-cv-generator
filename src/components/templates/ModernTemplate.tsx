@@ -273,8 +273,76 @@ export function ModernTemplate({ data, template }: TemplateProps) {
               </div>
             </section>
           )}
+
+          {/* Achievements */}
+          {data.achievements && data.achievements.length > 0 && template.sections.includes('achievements') && (
+            <section>
+              <h3
+                className="text-base font-bold mb-3 pb-2 border-b-2"
+                style={{ color: primaryColor, borderColor: primaryColor }}
+              >
+                ACHIEVEMENTS
+              </h3>
+              <div className="space-y-3">
+                {data.achievements.map((achievement, idx) => (
+                  <div key={achievement.id || idx}>
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-semibold text-gray-900 text-sm">{achievement.title}</h4>
+                      {achievement.year && (
+                        <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                          {achievement.year}
+                        </span>
+                      )}
+                    </div>
+                    {achievement.detail && (
+                      <p className="text-sm text-gray-700 mt-1">{achievement.detail}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Custom Sections */}
+          {data.customSections && data.customSections.length > 0 && template.sections.includes('custom') && (
+            <>
+              {data.customSections.map((section, sIdx) => (
+                <section key={section.id || sIdx}>
+                  <h3
+                    className="text-base font-bold mb-3 pb-2 border-b-2 uppercase"
+                    style={{ color: primaryColor, borderColor: primaryColor }}
+                  >
+                    {section.title}
+                  </h3>
+                  <div className="space-y-3">
+                    {section.items.map((item, iIdx) => (
+                      <div key={item.id || iIdx}>
+                        {item.heading && (
+                          <h4 className="font-bold text-gray-900 text-sm">{item.heading}</h4>
+                        )}
+                        {item.sub && (
+                          <p className="text-sm text-gray-600">{item.sub}</p>
+                        )}
+                        {item.bullets && item.bullets.length > 0 && (
+                          <ul className="list-disc list-inside space-y-0.5 text-sm text-gray-700 mt-1">
+                            {item.bullets.map((bullet, bIdx) => (
+                              <li key={bIdx}>{bullet}</li>
+                            ))}
+                          </ul>
+                        )}
+                        {item.body && (
+                          <p className="text-sm text-gray-700 mt-1">{item.body}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </>
+          )}
         </div>
       </div>
     </div>
   );
 }
+

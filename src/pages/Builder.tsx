@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useCvStore } from '@/stores/cv';
+import { useAuthStore } from '@/stores/auth';
 import { CvPreview } from '@/components/CvPreview';
+import { PhotoUpload } from '@/components/PhotoUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,12 +11,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Plus, Trash2, ArrowRight } from 'lucide-react';
-import type { Experience, Education, Skill } from '@/stores/cv';
+import type { Experience, Education, Skill, Achievement, CustomSection, CustomSectionItem } from '@/stores/cv';
+import { generateId } from '@/lib/format';
 
 export function Builder() {
   const { templateId } = useParams<{ templateId: string }>();
   const navigate = useNavigate();
   const { templates, activeDoc, createFromTemplate, updateActive, loadDemoTemplates } = useCvStore();
+  const { user } = useAuthStore();
   const [showPreview, setShowPreview] = useState(true);
 
   useEffect(() => {
@@ -28,6 +32,15 @@ export function Builder() {
       createFromTemplate(templateId);
     }
   }, [templateId, templates.length, activeDoc, createFromTemplate]);
+
+  // Auto-attach profile photo if CV photo is empty and user has avatar
+  useEffect(() => {
+    if (activeDoc && !activeDoc.personal.photoUrl && user?.avatarUrl) {
+      updateActive({
+        personal: { ...activeDoc.personal, photoUrl: user.avatarUrl },
+      });
+    }
+  }, [activeDoc?.id]); // Only run when activeDoc changes
 
   const template = templates.find((t) => t.id === templateId);
 
@@ -108,6 +121,129 @@ export function Builder() {
     updateActive({ skills: updated });
   };
 
+  // Achievements handlers
+  const addAchievement = () => {
+    const newAchievement: Achievement = {
+      id: generateId(),
+      title: '',
+    };
+    updateActive({
+      achievements: [...(activeDoc.achievements || []), newAchievement],
+    });
+  };
+
+  const updateAchievement = (index: number, field: keyof Achievement, value: any) => {
+    const updated = [...(activeDoc.achievements || [])];
+    updated[index] = { ...updated[index], [field]: value };
+    updateActive({ achievements: updated });
+  };
+
+  const removeAchievement = (index: number) => {
+    const updated = (activeDoc.achievements || []).filter((_, i) => i !== index);
+    updateActive({ achievements: updated });
+  };
+
+  // Custom Sections handlers
+  const addCustomSection = () => {
+    const title = prompt('Enter section title:');
+    if (!title) return;
+
+    const newSection: CustomSection = {
+      id: generateId(),
+      title,
+      items: [],
+    };
+    updateActive({
+      customSections: [...(activeDoc.customSections || []), newSection],
+    });
+  };
+
+  const updateCustomSectionTitle = (index: number, title: string) => {
+    const updated = [...(activeDoc.customSections || [])];
+    updated[index] = { ...updated[index], title };
+    updateActive({ customSections: updated });
+  };
+
+  const removeCustomSection = (index: number) => {
+    const updated = (activeDoc.customSections || []).filter((_, i) => i !== index);
+    updateActive({ customSections: updated });
+  };
+
+  const addCustomSectionItem = (sectionIndex: number) => {
+    const updated = [...(activeDoc.customSections || [])];
+    const newItem: CustomSectionItem = {
+      id: generateId(),
+    };
+    updated[sectionIndex] = {
+      ...updated[sectionIndex],
+      items: [...updated[sectionIndex].items, newItem],
+    };
+    updateActive({ customSections: updated });
+  };
+
+  const updateCustomSectionItem = (
+    sectionIndex: number,
+    itemIndex: number,
+    field: keyof CustomSectionItem,
+    value: any
+  ) => {
+    const updated = [...(activeDoc.customSections || [])];
+    const items = [...updated[sectionIndex].items];
+    items[itemIndex] = { ...items[itemIndex], [field]: value };
+    updated[sectionIndex] = { ...updated[sectionIndex], items };
+    updateActive({ customSections: updated });
+  };
+
+  const removeCustomSectionItem = (sectionIndex: number, itemIndex: number) => {
+    const updated = [...(activeDoc.customSections || [])];
+    updated[sectionIndex] = {
+      ...updated[sectionIndex],
+      items: updated[sectionIndex].items.filter((_, i) => i !== itemIndex),
+    };
+    updateActive({ customSections: updated });
+  };
+
+  const addBulletToCustomItem = (sectionIndex: number, itemIndex: number) => {
+    const updated = [...(activeDoc.customSections || [])];
+    const items = [...updated[sectionIndex].items];
+    items[itemIndex] = {
+      ...items[itemIndex],
+      bullets: [...(items[itemIndex].bullets || []), ''],
+    };
+    updated[sectionIndex] = { ...updated[sectionIndex], items };
+    updateActive({ customSections: updated });
+  };
+
+  const updateCustomItemBullet = (
+    sectionIndex: number,
+    itemIndex: number,
+    bulletIndex: number,
+    value: string
+  ) => {
+    const updated = [...(activeDoc.customSections || [])];
+    const items = [...updated[sectionIndex].items];
+    const bullets = [...(items[itemIndex].bullets || [])];
+    bullets[bulletIndex] = value;
+    items[itemIndex] = { ...items[itemIndex], bullets };
+    updated[sectionIndex] = { ...updated[sectionIndex], items };
+    updateActive({ customSections: updated });
+  };
+
+  const removeCustomItemBullet = (
+    sectionIndex: number,
+    itemIndex: number,
+    bulletIndex: number
+  ) => {
+    const updated = [...(activeDoc.customSections || [])];
+    const items = [...updated[sectionIndex].items];
+    items[itemIndex] = {
+      ...items[itemIndex],
+      bullets: (items[itemIndex].bullets || []).filter((_, i) => i !== bulletIndex),
+    };
+    updated[sectionIndex] = { ...updated[sectionIndex], items };
+    updateActive({ customSections: updated });
+  };
+
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Top Bar */}
@@ -154,6 +290,23 @@ export function Builder() {
                 <CardTitle>Personal Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Photo Upload */}
+                <div className="space-y-2">
+                  <Label>Profile Photo</Label>
+                  <PhotoUpload
+                    photoUrl={activeDoc.personal.photoUrl}
+                    fullName={activeDoc.personal.fullName}
+                    supportsPhoto={template.supportsPhoto}
+                    onChange={(photoUrl) =>
+                      updateActive({
+                        personal: { ...activeDoc.personal, photoUrl },
+                      })
+                    }
+                  />
+                </div>
+
+                <Separator />
+
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="fullName">Full Name *</Label>
@@ -515,6 +668,208 @@ export function Builder() {
                   {(!activeDoc.skills || activeDoc.skills.length === 0) && (
                     <p className="text-sm text-muted-foreground text-center py-4">
                       No skills added yet. Click "Add" to get started.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Achievements */}
+            {template.sections.includes('achievements') && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    Achievements
+                    <Button size="sm" variant="outline" onClick={addAchievement}>
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {(activeDoc.achievements || []).map((achievement, idx) => (
+                    <div key={achievement.id} className="space-y-3 p-4 border rounded-lg relative avoid-break">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="absolute top-2 right-2 h-8 w-8"
+                        onClick={() => removeAchievement(idx)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+
+                      <div className="space-y-2">
+                        <Label>Title *</Label>
+                        <Input
+                          value={achievement.title}
+                          onChange={(e) => updateAchievement(idx, 'title', e.target.value)}
+                          placeholder="Achievement title"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Year</Label>
+                        <Input
+                          value={achievement.year || ''}
+                          onChange={(e) => updateAchievement(idx, 'year', e.target.value)}
+                          placeholder="2024"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Details (optional)</Label>
+                        <Textarea
+                          value={achievement.detail || ''}
+                          onChange={(e) => updateAchievement(idx, 'detail', e.target.value)}
+                          placeholder="Additional context about this achievement..."
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                  ))}
+
+                  {(!activeDoc.achievements || activeDoc.achievements.length === 0) && (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No achievements added yet. Click "Add" to get started.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Custom Sections */}
+            {template.sections.includes('custom') && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    Custom Sections
+                    <Button size="sm" variant="outline" onClick={addCustomSection}>
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Section
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {(activeDoc.customSections || []).map((section, sIdx) => (
+                    <div key={section.id} className="space-y-4 p-4 border-2 rounded-lg">
+                      {/* Section Header */}
+                      <div className="flex items-center gap-2">
+                        <Input
+                          value={section.title}
+                          onChange={(e) => updateCustomSectionTitle(sIdx, e.target.value)}
+                          placeholder="Section title"
+                          className="font-semibold"
+                        />
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => removeCustomSection(sIdx)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      {/* Section Items */}
+                      <div className="space-y-3 pl-4">
+                        {section.items.map((item, iIdx) => (
+                          <div key={item.id} className="space-y-3 p-3 border rounded-lg relative avoid-break">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="absolute top-1 right-1 h-7 w-7"
+                              onClick={() => removeCustomSectionItem(sIdx, iIdx)}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+
+                            <div className="space-y-2">
+                              <Label className="text-xs">Heading</Label>
+                              <Input
+                                value={item.heading || ''}
+                                onChange={(e) =>
+                                  updateCustomSectionItem(sIdx, iIdx, 'heading', e.target.value)
+                                }
+                                placeholder="Item heading"
+                                className="text-sm"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-xs">Subheading</Label>
+                              <Input
+                                value={item.sub || ''}
+                                onChange={(e) =>
+                                  updateCustomSectionItem(sIdx, iIdx, 'sub', e.target.value)
+                                }
+                                placeholder="Subtitle or context"
+                                className="text-sm"
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-xs">Bullet Points</Label>
+                              {(item.bullets || []).map((bullet, bIdx) => (
+                                <div key={bIdx} className="flex gap-2">
+                                  <Input
+                                    value={bullet}
+                                    onChange={(e) =>
+                                      updateCustomItemBullet(sIdx, iIdx, bIdx, e.target.value)
+                                    }
+                                    placeholder="Bullet point..."
+                                    className="text-sm"
+                                  />
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="h-9 w-9"
+                                    onClick={() => removeCustomItemBullet(sIdx, iIdx, bIdx)}
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ))}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => addBulletToCustomItem(sIdx, iIdx)}
+                                className="text-xs h-7"
+                              >
+                                <Plus className="h-3 w-3 mr-1" />
+                                Add Bullet
+                              </Button>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-xs">Body Text</Label>
+                              <Textarea
+                                value={item.body || ''}
+                                onChange={(e) =>
+                                  updateCustomSectionItem(sIdx, iIdx, 'body', e.target.value)
+                                }
+                                placeholder="Additional details..."
+                                rows={2}
+                                className="text-sm"
+                              />
+                            </div>
+                          </div>
+                        ))}
+
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => addCustomSectionItem(sIdx)}
+                          className="w-full"
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add Item
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {(!activeDoc.customSections || activeDoc.customSections.length === 0) && (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No custom sections yet. Click "Add Section" to create one.
                     </p>
                   )}
                 </CardContent>
