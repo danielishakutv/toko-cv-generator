@@ -24,6 +24,8 @@ export function buildDummyCvForTemplate(template: Template): CvData {
         { label: 'LinkedIn', url: 'linkedin.com/in/danielishaku' },
         { label: 'GitHub', url: 'github.com/danielishaku' },
       ],
+      // Use placeholder photo for photo-capable templates
+      photoUrl: template.supportsPhoto ? 'https://via.placeholder.com/200x200/4A5568/FFFFFF?text=DI' : undefined,
     },
   };
 
@@ -113,9 +115,21 @@ export function buildDummyCvForTemplate(template: Template): CvData {
 
   if (sections.has('achievements')) {
     dummyData.achievements = [
-      'Winner of Tech Innovation Award 2023 for outstanding product leadership',
-      'Featured speaker at ProductCon Africa 2022',
-      'Mentored 5 junior product managers to successful promotions',
+      {
+        id: generateId(),
+        title: 'Winner of Tech Innovation Award 2023',
+        detail: 'Recognized for outstanding product leadership and innovation',
+        year: '2023',
+      },
+      {
+        id: generateId(),
+        title: 'Featured speaker at ProductCon Africa',
+        year: '2022',
+      },
+      {
+        id: generateId(),
+        title: 'Mentored 5 junior product managers to successful promotions',
+      },
     ];
   }
 
@@ -133,6 +147,23 @@ export function buildDummyCvForTemplate(template: Template): CvData {
       'Open Source Contribution',
       'Public Speaking',
       'Photography',
+    ];
+  }
+
+  if (sections.has('custom')) {
+    dummyData.customSections = [
+      {
+        id: generateId(),
+        title: 'Publications',
+        items: [
+          {
+            id: generateId(),
+            heading: 'The Future of Product Management in Africa',
+            sub: 'Tech Magazine · 2023',
+            body: 'Exploring emerging trends and opportunities in the African tech ecosystem',
+          },
+        ],
+      },
     ];
   }
 

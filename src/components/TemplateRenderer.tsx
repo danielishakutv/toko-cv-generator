@@ -2,6 +2,10 @@ import { CvData, Template } from '@/stores/cv';
 import { ClassicTemplate } from './templates/ClassicTemplate';
 import { ModernTemplate } from './templates/ModernTemplate';
 import { ElegantTemplate } from './templates/ElegantTemplate';
+import { PhotoBannerTemplate } from './templates/PhotoBannerTemplate';
+import { PhotoSidebarLeftTemplate } from './templates/PhotoSidebarLeftTemplate';
+import { MinimalGridTemplate } from './templates/MinimalGridTemplate';
+import { CompactSingleTemplate } from './templates/CompactSingleTemplate';
 
 interface TemplateRendererProps {
   template: Template;
@@ -54,6 +58,18 @@ export function TemplateRenderer({
     case 'academic':
       // Academic uses classic layout
       return <ClassicTemplate data={data} template={templateWithMode} />;
+    
+    case 'photo-banner':
+      return <PhotoBannerTemplate data={data} template={templateWithMode} />;
+    
+    case 'photo-sidebar-left':
+      return <PhotoSidebarLeftTemplate data={data} template={templateWithMode} />;
+    
+    case 'minimal-grid':
+      return <MinimalGridTemplate data={data} template={templateWithMode} />;
+    
+    case 'compact-single':
+      return <CompactSingleTemplate data={data} template={templateWithMode} />;
     
     default:
       // Safe fallback only
