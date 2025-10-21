@@ -54,7 +54,7 @@ export function MinimalGridTemplate({ data, template }: TemplateProps) {
         <div className="space-y-6">
           {/* Experience */}
           {experience && experience.length > 0 && (
-            <section>
+            <section className="avoid-break">
               <h2 className="text-base font-bold mb-3 uppercase tracking-wide" style={{ color: primaryColor }}>
                 Experience
               </h2>
@@ -80,7 +80,7 @@ export function MinimalGridTemplate({ data, template }: TemplateProps) {
 
           {/* Projects */}
           {projects && projects.length > 0 && (
-            <section>
+            <section className="avoid-break">
               <h2 className="text-base font-bold mb-3 uppercase tracking-wide" style={{ color: primaryColor }}>
                 Projects
               </h2>
@@ -114,7 +114,7 @@ export function MinimalGridTemplate({ data, template }: TemplateProps) {
         <div className="space-y-6">
           {/* Education */}
           {education && education.length > 0 && (
-            <section>
+            <section className="avoid-break">
               <h2 className="text-base font-bold mb-3 uppercase tracking-wide" style={{ color: primaryColor }}>
                 Education
               </h2>
@@ -154,7 +154,7 @@ export function MinimalGridTemplate({ data, template }: TemplateProps) {
 
           {/* Certifications */}
           {certifications && certifications.length > 0 && (
-            <section>
+            <section className="avoid-break">
               <h2 className="text-base font-bold mb-3 uppercase tracking-wide" style={{ color: primaryColor }}>
                 Certifications
               </h2>
@@ -175,3 +175,5 @@ export function MinimalGridTemplate({ data, template }: TemplateProps) {
     </div>
   );
 }
+
+

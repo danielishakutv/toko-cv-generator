@@ -74,7 +74,7 @@ export function ModernTemplate({ data, template }: TemplateProps) {
         <div className="col-span-1 space-y-8">
           {/* Skills */}
           {data.skills && data.skills.length > 0 && template.sections.includes('skills') && (
-            <section>
+            <section className="avoid-break">
               <h3
                 className="text-base font-bold mb-3 pb-2 border-b-2"
                 style={{ color: primaryColor, borderColor: primaryColor }}
@@ -113,7 +113,7 @@ export function ModernTemplate({ data, template }: TemplateProps) {
 
           {/* Languages */}
           {data.languages && data.languages.length > 0 && template.sections.includes('languages') && (
-            <section>
+            <section className="avoid-break">
               <h3
                 className="text-base font-bold mb-3 pb-2 border-b-2"
                 style={{ color: primaryColor, borderColor: primaryColor }}
@@ -133,7 +133,7 @@ export function ModernTemplate({ data, template }: TemplateProps) {
 
           {/* Interests */}
           {data.interests && data.interests.length > 0 && template.sections.includes('interests') && (
-            <section>
+            <section className="avoid-break">
               <h3
                 className="text-base font-bold mb-3 pb-2 border-b-2"
                 style={{ color: primaryColor, borderColor: primaryColor }}
@@ -153,7 +153,7 @@ export function ModernTemplate({ data, template }: TemplateProps) {
         <div className="col-span-2 space-y-8">
           {/* Summary */}
           {data.summary && template.sections.includes('summary') && (
-            <section>
+            <section className="avoid-break">
               <h3
                 className="text-base font-bold mb-3 pb-2 border-b-2"
                 style={{ color: primaryColor, borderColor: primaryColor }}
@@ -166,7 +166,7 @@ export function ModernTemplate({ data, template }: TemplateProps) {
 
           {/* Experience */}
           {data.experience && data.experience.length > 0 && template.sections.includes('experience') && (
-            <section>
+            <section className="avoid-break">
               <h3
                 className="text-base font-bold mb-3 pb-2 border-b-2"
                 style={{ color: primaryColor, borderColor: primaryColor }}
@@ -175,7 +175,7 @@ export function ModernTemplate({ data, template }: TemplateProps) {
               </h3>
               <div className="space-y-4">
                 {data.experience.map((exp, idx) => (
-                  <div key={idx}>
+                  <div key={idx} className="avoid-break">
                     <div className="flex justify-between items-start mb-1">
                       <h4 className="font-bold text-gray-900">{exp.role}</h4>
                       <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
@@ -198,7 +198,7 @@ export function ModernTemplate({ data, template }: TemplateProps) {
 
           {/* Education */}
           {data.education && data.education.length > 0 && template.sections.includes('education') && (
-            <section>
+            <section className="avoid-break">
               <h3
                 className="text-base font-bold mb-3 pb-2 border-b-2"
                 style={{ color: primaryColor, borderColor: primaryColor }}
@@ -207,7 +207,7 @@ export function ModernTemplate({ data, template }: TemplateProps) {
               </h3>
               <div className="space-y-3">
                 {data.education.map((edu, idx) => (
-                  <div key={idx}>
+                  <div key={idx} className="avoid-break">
                     <div className="flex justify-between items-start mb-1">
                       <h4 className="font-bold text-gray-900">{edu.degree}</h4>
                       <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
@@ -224,7 +224,7 @@ export function ModernTemplate({ data, template }: TemplateProps) {
 
           {/* Projects */}
           {data.projects && data.projects.length > 0 && template.sections.includes('projects') && (
-            <section>
+            <section className="avoid-break">
               <h3
                 className="text-base font-bold mb-3 pb-2 border-b-2"
                 style={{ color: primaryColor, borderColor: primaryColor }}
@@ -233,7 +233,7 @@ export function ModernTemplate({ data, template }: TemplateProps) {
               </h3>
               <div className="space-y-3">
                 {data.projects.map((project, idx) => (
-                  <div key={idx}>
+                  <div key={idx} className="avoid-break">
                     <h4 className="font-bold text-gray-900 text-sm">
                       {project.name}
                       {project.link && (
@@ -255,7 +255,7 @@ export function ModernTemplate({ data, template }: TemplateProps) {
 
           {/* Certifications */}
           {data.certifications && data.certifications.length > 0 && template.sections.includes('certifications') && (
-            <section>
+            <section className="avoid-break">
               <h3
                 className="text-base font-bold mb-3 pb-2 border-b-2"
                 style={{ color: primaryColor, borderColor: primaryColor }}
@@ -276,7 +276,7 @@ export function ModernTemplate({ data, template }: TemplateProps) {
 
           {/* Achievements */}
           {data.achievements && data.achievements.length > 0 && template.sections.includes('achievements') && (
-            <section>
+            <section className="avoid-break">
               <h3
                 className="text-base font-bold mb-3 pb-2 border-b-2"
                 style={{ color: primaryColor, borderColor: primaryColor }}
@@ -285,7 +285,7 @@ export function ModernTemplate({ data, template }: TemplateProps) {
               </h3>
               <div className="space-y-3">
                 {data.achievements.map((achievement, idx) => (
-                  <div key={achievement.id || idx}>
+                  <div key={achievement.id || idx} className="avoid-break">
                     <div className="flex justify-between items-start">
                       <h4 className="font-semibold text-gray-900 text-sm">{achievement.title}</h4>
                       {achievement.year && (
@@ -307,7 +307,7 @@ export function ModernTemplate({ data, template }: TemplateProps) {
           {data.customSections && data.customSections.length > 0 && template.sections.includes('custom') && (
             <>
               {data.customSections.map((section, sIdx) => (
-                <section key={section.id || sIdx}>
+                <section key={section.id || sIdx} className="avoid-break">
                   <h3
                     className="text-base font-bold mb-3 pb-2 border-b-2 uppercase"
                     style={{ color: primaryColor, borderColor: primaryColor }}
@@ -316,7 +316,7 @@ export function ModernTemplate({ data, template }: TemplateProps) {
                   </h3>
                   <div className="space-y-3">
                     {section.items.map((item, iIdx) => (
-                      <div key={item.id || iIdx}>
+                      <div key={item.id || iIdx} className="avoid-break">
                         {item.heading && (
                           <h4 className="font-bold text-gray-900 text-sm">{item.heading}</h4>
                         )}

@@ -81,7 +81,7 @@ export function CompactSingleTemplate({ data, template }: TemplateProps) {
 
       {/* Experience */}
       {experience && experience.length > 0 && (
-        <section className="mb-4">
+        <section className="avoid-break mb-4">
           <h2 className="text-sm font-bold mb-2 uppercase tracking-wide" style={{ color: primaryColor }}>
             Experience
           </h2>
@@ -110,7 +110,7 @@ export function CompactSingleTemplate({ data, template }: TemplateProps) {
 
       {/* Education */}
       {education && education.length > 0 && (
-        <section className="mb-4">
+        <section className="avoid-break mb-4">
           <h2 className="text-sm font-bold mb-2 uppercase tracking-wide" style={{ color: primaryColor }}>
             Education
           </h2>
@@ -153,7 +153,7 @@ export function CompactSingleTemplate({ data, template }: TemplateProps) {
 
       {/* Achievements */}
       {achievements && achievements.length > 0 && (
-        <section className="mb-4">
+        <section className="avoid-break mb-4">
           <h2 className="text-sm font-bold mb-2 uppercase tracking-wide" style={{ color: primaryColor }}>
             Achievements
           </h2>
@@ -182,7 +182,7 @@ export function CompactSingleTemplate({ data, template }: TemplateProps) {
       {customSections && customSections.length > 0 && (
         <>
           {customSections.map((section) => (
-            <section key={section.id} className="mb-4">
+            <section key={section.id} className="avoid-break mb-4">
               <h2 className="text-sm font-bold mb-2 uppercase tracking-wide" style={{ color: primaryColor }}>
                 {section.title}
               </h2>
@@ -209,3 +209,6 @@ export function CompactSingleTemplate({ data, template }: TemplateProps) {
     </div>
   );
 }
+
+
+

@@ -88,7 +88,7 @@ export function PhotoBannerTemplate({ data, template }: TemplateProps) {
 
           {/* Experience */}
           {experience && experience.length > 0 && (
-            <section>
+            <section className="avoid-break">
               <h2 className="text-lg font-bold mb-3 pb-2 border-b-2" style={{ borderColor: primaryColor, color: primaryColor }}>
                 Experience
               </h2>
@@ -114,7 +114,7 @@ export function PhotoBannerTemplate({ data, template }: TemplateProps) {
 
           {/* Education */}
           {education && education.length > 0 && (
-            <section>
+            <section className="avoid-break">
               <h2 className="text-lg font-bold mb-3 pb-2 border-b-2" style={{ borderColor: primaryColor, color: primaryColor }}>
                 Education
               </h2>
@@ -157,7 +157,7 @@ export function PhotoBannerTemplate({ data, template }: TemplateProps) {
 
           {/* Achievements */}
           {achievements && achievements.length > 0 && (
-            <section>
+            <section className="avoid-break">
               <h2 className="text-lg font-bold mb-3 pb-2 border-b-2" style={{ borderColor: primaryColor, color: primaryColor }}>
                 Achievements
               </h2>
@@ -186,3 +186,4 @@ export function PhotoBannerTemplate({ data, template }: TemplateProps) {
     </div>
   );
 }
+
