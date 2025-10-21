@@ -78,7 +78,7 @@ export function ClassicTemplate({ data, template }: TemplateProps) {
 
       {/* Summary */}
       {data.summary && template.sections.includes('summary') && (
-        <section className="mb-8">
+        <section className="mb-8 avoid-break">
           <h3
             className="text-lg font-bold mb-3 uppercase tracking-wide"
             style={{ color: primaryColor }}
@@ -91,7 +91,7 @@ export function ClassicTemplate({ data, template }: TemplateProps) {
 
       {/* Experience */}
       {data.experience && data.experience.length > 0 && template.sections.includes('experience') && (
-        <section className="mb-8">
+        <section className="mb-8 avoid-break">
           <h3
             className="text-lg font-bold mb-4 uppercase tracking-wide"
             style={{ color: primaryColor }}
@@ -100,7 +100,7 @@ export function ClassicTemplate({ data, template }: TemplateProps) {
           </h3>
           <div className="space-y-6">
             {data.experience.map((exp, idx) => (
-              <div key={idx}>
+              <div key={idx} className="avoid-break">
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <h4 className="font-bold text-gray-900">{exp.role}</h4>
@@ -125,7 +125,7 @@ export function ClassicTemplate({ data, template }: TemplateProps) {
 
       {/* Education */}
       {data.education && data.education.length > 0 && template.sections.includes('education') && (
-        <section className="mb-8">
+        <section className="mb-8 avoid-break">
           <h3
             className="text-lg font-bold mb-4 uppercase tracking-wide"
             style={{ color: primaryColor }}
@@ -134,7 +134,7 @@ export function ClassicTemplate({ data, template }: TemplateProps) {
           </h3>
           <div className="space-y-4">
             {data.education.map((edu, idx) => (
-              <div key={idx}>
+              <div key={idx} className="avoid-break">
                 <div className="flex justify-between items-start mb-1">
                   <div>
                     <h4 className="font-bold text-gray-900">{edu.degree}</h4>
@@ -153,7 +153,7 @@ export function ClassicTemplate({ data, template }: TemplateProps) {
 
       {/* Skills */}
       {data.skills && data.skills.length > 0 && template.sections.includes('skills') && (
-        <section className="mb-8">
+        <section className="mb-8 avoid-break">
           <h3
             className="text-lg font-bold mb-4 uppercase tracking-wide"
             style={{ color: primaryColor }}
@@ -176,7 +176,7 @@ export function ClassicTemplate({ data, template }: TemplateProps) {
 
       {/* Projects */}
       {data.projects && data.projects.length > 0 && template.sections.includes('projects') && (
-        <section className="mb-8">
+        <section className="mb-8 avoid-break">
           <h3
             className="text-lg font-bold mb-4 uppercase tracking-wide"
             style={{ color: primaryColor }}
@@ -185,7 +185,7 @@ export function ClassicTemplate({ data, template }: TemplateProps) {
           </h3>
           <div className="space-y-4">
             {data.projects.map((project, idx) => (
-              <div key={idx}>
+              <div key={idx} className="avoid-break">
                 <h4 className="font-bold text-gray-900">
                   {project.name}
                   {project.link && (
@@ -213,7 +213,7 @@ export function ClassicTemplate({ data, template }: TemplateProps) {
 
       {/* Certifications */}
       {data.certifications && data.certifications.length > 0 && template.sections.includes('certifications') && (
-        <section className="mb-8">
+        <section className="mb-8 avoid-break">
           <h3
             className="text-lg font-bold mb-4 uppercase tracking-wide"
             style={{ color: primaryColor }}
@@ -236,7 +236,7 @@ export function ClassicTemplate({ data, template }: TemplateProps) {
 
       {/* Languages */}
       {data.languages && data.languages.length > 0 && template.sections.includes('languages') && (
-        <section className="mb-8">
+        <section className="mb-8 avoid-break">
           <h3
             className="text-lg font-bold mb-4 uppercase tracking-wide"
             style={{ color: primaryColor }}
@@ -256,7 +256,7 @@ export function ClassicTemplate({ data, template }: TemplateProps) {
 
       {/* Achievements */}
       {data.achievements && data.achievements.length > 0 && template.sections.includes('achievements') && (
-        <section className="mb-8">
+        <section className="mb-8 avoid-break">
           <h3
             className="text-lg font-bold mb-4 uppercase tracking-wide"
             style={{ color: primaryColor }}
@@ -265,7 +265,7 @@ export function ClassicTemplate({ data, template }: TemplateProps) {
           </h3>
           <div className="space-y-3">
             {data.achievements.map((achievement, idx) => (
-              <div key={achievement.id || idx}>
+              <div key={achievement.id || idx} className="avoid-break">
                 <div className="flex justify-between items-start">
                   <h4 className="font-semibold text-gray-900">{achievement.title}</h4>
                   {achievement.year && (
@@ -287,7 +287,7 @@ export function ClassicTemplate({ data, template }: TemplateProps) {
       {data.customSections && data.customSections.length > 0 && template.sections.includes('custom') && (
         <>
           {data.customSections.map((section, sIdx) => (
-            <section key={section.id || sIdx} className="mb-8">
+            <section key={section.id || sIdx} className="mb-8 avoid-break">
               <h3
                 className="text-lg font-bold mb-4 uppercase tracking-wide"
                 style={{ color: primaryColor }}
@@ -296,7 +296,7 @@ export function ClassicTemplate({ data, template }: TemplateProps) {
               </h3>
               <div className="space-y-4">
                 {section.items.map((item, iIdx) => (
-                  <div key={item.id || iIdx}>
+                  <div key={item.id || iIdx} className="avoid-break">
                     {item.heading && (
                       <h4 className="font-bold text-gray-900">{item.heading}</h4>
                     )}
@@ -323,7 +323,7 @@ export function ClassicTemplate({ data, template }: TemplateProps) {
 
       {/* Interests */}
       {data.interests && data.interests.length > 0 && template.sections.includes('interests') && (
-        <section className="mb-8">
+        <section className="mb-8 avoid-break">
           <h3
             className="text-lg font-bold mb-4 uppercase tracking-wide"
             style={{ color: primaryColor }}
