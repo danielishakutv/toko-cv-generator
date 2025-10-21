@@ -51,13 +51,6 @@ export function PhotoUpload({ photoUrl, fullName, supportsPhoto, onChange }: Pho
     }
   };
 
-  const initials = fullName
-    ?.split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2) || '??';
-
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">

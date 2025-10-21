@@ -105,7 +105,7 @@ export function PhotoSidebarLeftTemplate({ data, template }: TemplateProps) {
 
         {/* Summary */}
         {summary && (
-          <section className="avoid-break" className="avoid-break mb-6">
+          <section className="avoid-break mb-6">
             <h2 className="text-lg font-bold mb-3 pb-2 border-b-2" style={{ borderColor: primaryColor, color: primaryColor }}>
               Profile
             </h2>
@@ -115,7 +115,7 @@ export function PhotoSidebarLeftTemplate({ data, template }: TemplateProps) {
 
         {/* Experience */}
         {experience && experience.length > 0 && (
-          <section className="avoid-break" className="mb-6">
+          <section className="avoid-break mb-6">
             <h2 className="text-lg font-bold mb-3 pb-2 border-b-2" style={{ borderColor: primaryColor, color: primaryColor }}>
               Experience
             </h2>
@@ -162,5 +162,6 @@ export function PhotoSidebarLeftTemplate({ data, template }: TemplateProps) {
     </div>
   );
 }
+
 
 
