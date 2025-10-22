@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { authApi, setTokens, clearTokens } from '@/lib/api';
 
 export interface User {
   id: string;
@@ -8,17 +9,22 @@ export interface User {
   avatarUrl?: string;
   location?: string;
   role?: string;
+  currency?: string;
 }
 
 interface AuthState {
   user: User | null;
   redirectTo: string | null;
+  isLoading: boolean;
+  error: string | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
-  signOut: () => void;
+  signOut: () => Promise<void>;
   requireAuth: (actionName?: string) => boolean;
   updateUser: (updates: Partial<User>) => void;
   setRedirectTo: (path: string | null) => void;
+  clearError: () => void;
+  initializeAuth: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -26,38 +32,80 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       redirectTo: null,
+      isLoading: false,
+      error: null,
 
-      signIn: async (email: string, _password: string) => {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
+      signIn: async (email: string, password: string) => {
+        set({ isLoading: true, error: null });
         
-        // Create demo user from email
-        const user: User = {
-          id: `user-${Date.now()}`,
-          name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-          email,
-          avatarUrl: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(email)}`,
-        };
-        
-        set({ user });
+        try {
+          const response = await authApi.login({ email, password });
+          
+          if (response.success) {
+            // Store tokens
+            setTokens(response.access_token, response.refresh_token);
+            
+            // Store user data
+            const user: User = {
+              id: response.user.id,
+              name: response.user.name,
+              email: response.user.email,
+              avatarUrl: response.user.avatar_url,
+              currency: response.user.currency,
+            };
+            
+            set({ user, isLoading: false });
+          } else {
+            throw new Error(response.message || 'Login failed');
+          }
+        } catch (error: any) {
+          const errorMessage = error.response?.data?.message || error.message || 'Login failed';
+          set({ error: errorMessage, isLoading: false });
+          throw new Error(errorMessage);
+        }
       },
 
-      signUp: async (name: string, email: string, _password: string) => {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
+      signUp: async (name: string, email: string, password: string) => {
+        set({ isLoading: true, error: null });
         
-        const user: User = {
-          id: `user-${Date.now()}`,
-          name,
-          email,
-          avatarUrl: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`,
-        };
-        
-        set({ user });
+        try {
+          const response = await authApi.register({ name, email, password });
+          
+          if (response.success) {
+            // Store tokens
+            setTokens(response.access_token, response.refresh_token);
+            
+            // Store user data
+            const user: User = {
+              id: response.user.id,
+              name: response.user.name,
+              email: response.user.email,
+              avatarUrl: response.user.avatar_url,
+              currency: response.user.currency,
+            };
+            
+            set({ user, isLoading: false });
+          } else {
+            throw new Error(response.message || 'Registration failed');
+          }
+        } catch (error: any) {
+          const errorMessage = error.response?.data?.message || error.message || 'Registration failed';
+          set({ error: errorMessage, isLoading: false });
+          throw new Error(errorMessage);
+        }
       },
 
-      signOut: () => {
-        set({ user: null });
+      signOut: async () => {
+        set({ isLoading: true });
+        
+        try {
+          await authApi.logout();
+        } catch (error) {
+          console.error('Logout error:', error);
+        } finally {
+          clearTokens();
+          set({ user: null, isLoading: false });
+        }
       },
 
       requireAuth: (actionName?: string) => {
@@ -77,6 +125,36 @@ export const useAuthStore = create<AuthState>()(
 
       setRedirectTo: (path: string | null) => {
         set({ redirectTo: path });
+      },
+
+      clearError: () => {
+        set({ error: null });
+      },
+
+      initializeAuth: async () => {
+        // Try to fetch current user on app load if tokens exist
+        const { user } = get();
+        if (!user) {
+          try {
+            const response = await authApi.getCurrentUser();
+            if (response.success && response.user) {
+              const user: User = {
+                id: response.user.id,
+                name: response.user.name,
+                email: response.user.email,
+                avatarUrl: response.user.avatar_url,
+                currency: response.user.currency,
+                role: response.user.role,
+                location: response.user.location,
+              };
+              set({ user });
+            }
+          } catch (error) {
+            // Silent fail - user will need to login
+            clearTokens();
+            set({ user: null });
+          }
+        }
       },
     }),
     {

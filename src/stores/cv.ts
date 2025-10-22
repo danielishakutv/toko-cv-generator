@@ -13,7 +13,8 @@ export type SectionType =
   | 'certifications'
   | 'languages'
   | 'interests'
-  | 'custom';
+  | 'custom'
+  | 'others';
 
 export type LayoutType = 'one-column' | 'two-column' | 'sidebar-left' | 'sidebar-right';
 export type FontType = 'system' | 'serif' | 'mono';
@@ -118,6 +119,7 @@ export interface CvData {
   languages?: Language[];
   interests?: string[];
   customSections?: CustomSection[];  // NEW - user-defined sections
+  otherSections?: CustomSection[];  // NEW - additional flexible sections
 }
 
 interface CvState {
@@ -138,7 +140,7 @@ const DEMO_TEMPLATES: Template[] = [
     id: 'classic',
     name: 'Classic',
     thumbnail: '/templates/classic.png',
-    sections: ['summary', 'experience', 'education', 'skills'],
+    sections: ['summary', 'experience', 'education', 'skills', 'others'],
     layout: 'one-column',
     theme: { primary: '#2563eb', font: 'system' },
   },
@@ -146,7 +148,7 @@ const DEMO_TEMPLATES: Template[] = [
     id: 'modern',
     name: 'Modern Two-Column',
     thumbnail: '/templates/modern.png',
-    sections: ['summary', 'experience', 'education', 'skills', 'languages'],
+    sections: ['summary', 'experience', 'education', 'skills', 'languages', 'others'],
     layout: 'two-column',
     theme: { primary: '#7c3aed', font: 'system' },
   },
@@ -154,7 +156,7 @@ const DEMO_TEMPLATES: Template[] = [
     id: 'elegant',
     name: 'Elegant Sidebar',
     thumbnail: '/templates/elegant.png',
-    sections: ['summary', 'experience', 'education', 'skills', 'interests'],
+    sections: ['summary', 'experience', 'education', 'skills', 'interests', 'others'],
     layout: 'sidebar-left',
     theme: { primary: '#059669', font: 'serif' },
   },
@@ -162,7 +164,7 @@ const DEMO_TEMPLATES: Template[] = [
     id: 'minimal',
     name: 'Minimal',
     thumbnail: '/templates/minimal.png',
-    sections: ['experience', 'education', 'skills', 'projects'],
+    sections: ['experience', 'education', 'skills', 'projects', 'others'],
     layout: 'one-column',
     theme: { primary: '#0891b2', font: 'system' },
   },
@@ -170,7 +172,7 @@ const DEMO_TEMPLATES: Template[] = [
     id: 'creative',
     name: 'Creative',
     thumbnail: '/templates/creative.png',
-    sections: ['summary', 'experience', 'projects', 'skills', 'achievements'],
+    sections: ['summary', 'experience', 'projects', 'skills', 'achievements', 'others'],
     layout: 'sidebar-right',
     theme: { primary: '#dc2626', font: 'system' },
   },
@@ -178,7 +180,7 @@ const DEMO_TEMPLATES: Template[] = [
     id: 'professional',
     name: 'Professional',
     thumbnail: '/templates/professional.png',
-    sections: ['summary', 'experience', 'education', 'skills', 'certifications'],
+    sections: ['summary', 'experience', 'education', 'skills', 'certifications', 'others'],
     layout: 'two-column',
     theme: { primary: '#0f172a', font: 'serif' },
   },
@@ -186,7 +188,7 @@ const DEMO_TEMPLATES: Template[] = [
     id: 'tech',
     name: 'Tech Focus',
     thumbnail: '/templates/tech.png',
-    sections: ['summary', 'experience', 'projects', 'skills', 'education'],
+    sections: ['summary', 'experience', 'projects', 'skills', 'education', 'others'],
     layout: 'one-column',
     theme: { primary: '#4f46e5', font: 'mono' },
   },
@@ -194,7 +196,7 @@ const DEMO_TEMPLATES: Template[] = [
     id: 'executive',
     name: 'Executive',
     thumbnail: '/templates/executive.png',
-    sections: ['summary', 'experience', 'achievements', 'education', 'certifications'],
+    sections: ['summary', 'experience', 'achievements', 'education', 'certifications', 'others'],
     layout: 'sidebar-left',
     theme: { primary: '#92400e', font: 'serif' },
   },
@@ -202,7 +204,7 @@ const DEMO_TEMPLATES: Template[] = [
     id: 'academic',
     name: 'Academic',
     thumbnail: '/templates/academic.png',
-    sections: ['summary', 'education', 'experience', 'projects', 'certifications', 'languages'],
+    sections: ['summary', 'education', 'experience', 'projects', 'certifications', 'languages', 'others'],
     layout: 'one-column',
     theme: { primary: '#1e40af', font: 'serif' },
   },
@@ -210,7 +212,7 @@ const DEMO_TEMPLATES: Template[] = [
     id: 'photo-banner',
     name: 'Photo Banner',
     thumbnail: '/templates/photo-banner.png',
-    sections: ['summary', 'experience', 'education', 'skills', 'achievements'],
+    sections: ['summary', 'experience', 'education', 'skills', 'achievements', 'others'],
     layout: 'two-column',
     supportsPhoto: true,
     theme: { primary: '#ea580c', font: 'system' },
@@ -219,7 +221,7 @@ const DEMO_TEMPLATES: Template[] = [
     id: 'photo-sidebar-left',
     name: 'Photo Sidebar',
     thumbnail: '/templates/photo-sidebar-left.png',
-    sections: ['summary', 'experience', 'education', 'skills', 'languages'],
+    sections: ['summary', 'experience', 'education', 'skills', 'languages', 'others'],
     layout: 'sidebar-left',
     supportsPhoto: true,
     theme: { primary: '#16a34a', font: 'system' },
@@ -228,7 +230,7 @@ const DEMO_TEMPLATES: Template[] = [
     id: 'minimal-grid',
     name: 'Minimal Grid',
     thumbnail: '/templates/minimal-grid.png',
-    sections: ['experience', 'education', 'skills', 'projects', 'certifications'],
+    sections: ['experience', 'education', 'skills', 'projects', 'certifications', 'others'],
     layout: 'two-column',
     theme: { primary: '#6366f1', font: 'system' },
   },
@@ -236,7 +238,7 @@ const DEMO_TEMPLATES: Template[] = [
     id: 'compact-single',
     name: 'Compact Single',
     thumbnail: '/templates/compact-single.png',
-    sections: ['summary', 'experience', 'education', 'skills', 'achievements', 'custom'],
+    sections: ['summary', 'experience', 'education', 'skills', 'achievements', 'custom', 'others'],
     layout: 'one-column',
     supportsPhoto: true,
     theme: { primary: '#be123c', font: 'system' },

@@ -170,6 +170,44 @@ export function MinimalGridTemplate({ data, template }: TemplateProps) {
               </div>
             </section>
           )}
+
+          {/* Others Sections */}
+          {data.otherSections && data.otherSections.length > 0 && template.sections.includes('others') && (
+            <>
+              {data.otherSections.map((section, sIdx) => (
+                <section key={section.id || sIdx} className="avoid-break">
+                  <h2
+                    className="text-xs font-bold uppercase tracking-wider mb-3"
+                    style={{ color: primaryColor }}
+                  >
+                    {section.title}
+                  </h2>
+                  <div className="space-y-2">
+                    {section.items.map((item, iIdx) => (
+                      <div key={item.id || iIdx} className="avoid-break">
+                        {item.heading && (
+                          <p className="font-semibold text-xs">{item.heading}</p>
+                        )}
+                        {item.sub && (
+                          <p className="text-gray-600 text-xs">{item.sub}</p>
+                        )}
+                        {item.body && (
+                          <p className="text-gray-700 text-xs mt-1">{item.body}</p>
+                        )}
+                        {item.bullets && item.bullets.length > 0 && (
+                          <ul className="list-disc list-inside space-y-0.5 text-xs text-gray-700 mt-1">
+                            {item.bullets.map((bullet, bIdx) => (
+                              <li key={bIdx}>{bullet}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </>
+          )}
         </div>
       </div>
     </div>

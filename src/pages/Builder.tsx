@@ -10,6 +10,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { ArrowLeft, Plus, Trash2, ArrowRight } from 'lucide-react';
 import type { Experience, Education, Skill, Achievement, CustomSection, CustomSectionItem } from '@/stores/cv';
 import { generateId } from '@/lib/format';
@@ -244,24 +250,126 @@ export function Builder() {
     updateActive({ customSections: updated });
   };
 
-  return (
-    <div className="min-h-screen bg-muted/30">
-      {/* Top Bar */}
-      <div className="sticky top-0 z-30 bg-background border-b print-hide">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/templates">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back
-                </Link>
-              </Button>
-              <Separator orientation="vertical" className="h-6" />
-              <h2 className="font-semibold">{template.name}</h2>
-            </div>
+  // Other Sections handlers (similar to Custom Sections)
+  const addOtherSection = () => {
+    const title = prompt('Enter section name:');
+    if (!title) return;
 
-            <div className="flex items-center gap-3">
+    const newSection: CustomSection = {
+      id: generateId(),
+      title,
+      items: [],
+    };
+    updateActive({
+      otherSections: [...(activeDoc.otherSections || []), newSection],
+    });
+  };
+
+  const updateOtherSectionTitle = (index: number, title: string) => {
+    const updated = [...(activeDoc.otherSections || [])];
+    updated[index] = { ...updated[index], title };
+    updateActive({ otherSections: updated });
+  };
+
+  const removeOtherSection = (index: number) => {
+    const updated = (activeDoc.otherSections || []).filter((_, i) => i !== index);
+    updateActive({ otherSections: updated });
+  };
+
+  const addOtherSectionItem = (sectionIndex: number) => {
+    const updated = [...(activeDoc.otherSections || [])];
+    const newItem: CustomSectionItem = {
+      id: generateId(),
+    };
+    updated[sectionIndex] = {
+      ...updated[sectionIndex],
+      items: [...updated[sectionIndex].items, newItem],
+    };
+    updateActive({ otherSections: updated });
+  };
+
+  const updateOtherSectionItem = (
+    sectionIndex: number,
+    itemIndex: number,
+    field: keyof CustomSectionItem,
+    value: any
+  ) => {
+    const updated = [...(activeDoc.otherSections || [])];
+    const items = [...updated[sectionIndex].items];
+    items[itemIndex] = { ...items[itemIndex], [field]: value };
+    updated[sectionIndex] = { ...updated[sectionIndex], items };
+    updateActive({ otherSections: updated });
+  };
+
+  const removeOtherSectionItem = (sectionIndex: number, itemIndex: number) => {
+    const updated = [...(activeDoc.otherSections || [])];
+    updated[sectionIndex] = {
+      ...updated[sectionIndex],
+      items: updated[sectionIndex].items.filter((_, i) => i !== itemIndex),
+    };
+    updateActive({ otherSections: updated });
+  };
+
+  const addBulletToOtherItem = (sectionIndex: number, itemIndex: number) => {
+    const updated = [...(activeDoc.otherSections || [])];
+    const items = [...updated[sectionIndex].items];
+    items[itemIndex] = {
+      ...items[itemIndex],
+      bullets: [...(items[itemIndex].bullets || []), ''],
+    };
+    updated[sectionIndex] = { ...updated[sectionIndex], items };
+    updateActive({ otherSections: updated });
+  };
+
+  const updateOtherItemBullet = (
+    sectionIndex: number,
+    itemIndex: number,
+    bulletIndex: number,
+    value: string
+  ) => {
+    const updated = [...(activeDoc.otherSections || [])];
+    const items = [...updated[sectionIndex].items];
+    const bullets = [...(items[itemIndex].bullets || [])];
+    bullets[bulletIndex] = value;
+    items[itemIndex] = { ...items[itemIndex], bullets };
+    updated[sectionIndex] = { ...updated[sectionIndex], items };
+    updateActive({ otherSections: updated });
+  };
+
+  const removeOtherItemBullet = (
+    sectionIndex: number,
+    itemIndex: number,
+    bulletIndex: number
+  ) => {
+    const updated = [...(activeDoc.otherSections || [])];
+    const items = [...updated[sectionIndex].items];
+    items[itemIndex] = {
+      ...items[itemIndex],
+      bullets: (items[itemIndex].bullets || []).filter((_, i) => i !== bulletIndex),
+    };
+    updated[sectionIndex] = { ...updated[sectionIndex], items };
+    updateActive({ otherSections: updated });
+  };
+
+  return (
+    <TooltipProvider>
+      <div className="min-h-screen bg-muted/30">
+        {/* Top Bar */}
+        <div className="sticky top-0 z-30 bg-background border-b print-hide">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center gap-4">
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/templates">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back
+                  </Link>
+                </Button>
+                <Separator orientation="vertical" className="h-6" />
+                <h2 className="font-semibold">{template.name}</h2>
+              </div>
+
+              <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="sm"
@@ -303,6 +411,11 @@ export function Builder() {
                       })
                     }
                   />
+                  {!template.supportsPhoto && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      💡 This template doesn't display photos. Try a photo template like Photo Banner or Photo Sidebar for professional headshots.
+                    </p>
+                  )}
                 </div>
 
                 <Separator />
@@ -403,6 +516,9 @@ export function Builder() {
               <Card>
                 <CardHeader>
                   <CardTitle>Professional Summary</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    A brief overview highlighting your experience, skills, and career goals (2-4 sentences recommended)
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <Textarea
@@ -410,6 +526,7 @@ export function Builder() {
                     onChange={(e) => updateActive({ summary: e.target.value })}
                     placeholder="Write a brief summary of your professional background and key strengths..."
                     rows={5}
+                    aria-label="Professional summary"
                   />
                 </CardContent>
               </Card>
@@ -421,10 +538,17 @@ export function Builder() {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     Experience
-                    <Button size="sm" variant="outline" onClick={addExperience}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="sm" variant="outline" onClick={addExperience}>
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Add a work experience entry to showcase your professional background</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -435,6 +559,7 @@ export function Builder() {
                         variant="ghost"
                         className="absolute top-2 right-2 h-8 w-8"
                         onClick={() => removeExperience(idx)}
+                        aria-label={`Remove experience: ${exp.company || 'Untitled'}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -504,6 +629,7 @@ export function Builder() {
                                 updateExperience(idx, 'bullets', newBullets);
                               }}
                               placeholder="Describe your achievement..."
+                              aria-label={`Achievement bullet point ${bidx + 1} for ${exp.company || 'experience'}`}
                             />
                             {exp.bullets.length > 1 && (
                               <Button
@@ -513,6 +639,7 @@ export function Builder() {
                                   const newBullets = exp.bullets.filter((_, i) => i !== bidx);
                                   updateExperience(idx, 'bullets', newBullets);
                                 }}
+                                aria-label={`Remove bullet point ${bidx + 1}`}
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -548,10 +675,17 @@ export function Builder() {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     Education
-                    <Button size="sm" variant="outline" onClick={addEducation}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="sm" variant="outline" onClick={addEducation}>
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Add an education credential, degree, or certification</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -562,6 +696,7 @@ export function Builder() {
                         variant="ghost"
                         className="absolute top-2 right-2 h-8 w-8"
                         onClick={() => removeEducation(idx)}
+                        aria-label={`Remove education: ${edu.school || 'Untitled'}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -630,10 +765,17 @@ export function Builder() {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     Skills
-                    <Button size="sm" variant="outline" onClick={addSkill}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="sm" variant="outline" onClick={addSkill}>
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Add a skill with an optional proficiency level</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -644,11 +786,13 @@ export function Builder() {
                         onChange={(e) => updateSkill(idx, 'name', e.target.value)}
                         placeholder="Skill name"
                         className="flex-1"
+                        aria-label={`Skill ${idx + 1} name`}
                       />
                       <select
                         value={skill.level || ''}
                         onChange={(e) => updateSkill(idx, 'level', e.target.value || undefined)}
                         className="px-3 py-2 border rounded-md bg-background"
+                        aria-label={`Skill ${idx + 1} level`}
                       >
                         <option value="">Level</option>
                         <option value="Beginner">Beginner</option>
@@ -659,6 +803,7 @@ export function Builder() {
                         size="icon"
                         variant="ghost"
                         onClick={() => removeSkill(idx)}
+                        aria-label={`Remove skill: ${skill.name || 'Untitled'}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -680,10 +825,17 @@ export function Builder() {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     Achievements
-                    <Button size="sm" variant="outline" onClick={addAchievement}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="sm" variant="outline" onClick={addAchievement}>
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Add an award, recognition, or notable accomplishment</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -694,6 +846,7 @@ export function Builder() {
                         variant="ghost"
                         className="absolute top-2 right-2 h-8 w-8"
                         onClick={() => removeAchievement(idx)}
+                        aria-label={`Remove achievement: ${achievement.title || 'Untitled'}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -743,10 +896,17 @@ export function Builder() {
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     Custom Sections
-                    <Button size="sm" variant="outline" onClick={addCustomSection}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Section
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="sm" variant="outline" onClick={addCustomSection}>
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add Section
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Create a custom section for projects, publications, or other content</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -875,6 +1035,155 @@ export function Builder() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Others Sections */}
+            {template.sections.includes('others') && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    Others
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button size="sm" variant="outline" onClick={addOtherSection}>
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add Section
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Create additional sections for certifications, awards, publications, or any other content</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Add flexible sections with custom names and structured content
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {(activeDoc.otherSections || []).map((section, sIdx) => (
+                    <div key={section.id} className="space-y-4 p-4 border-2 border-dashed rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <div className="flex-1 space-y-2">
+                          <Label>Section Name</Label>
+                          <Input
+                            value={section.title}
+                            onChange={(e) => updateOtherSectionTitle(sIdx, e.target.value)}
+                            placeholder="e.g., Awards, Publications, Certifications"
+                            className="font-semibold"
+                          />
+                        </div>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => removeOtherSection(sIdx)}
+                          aria-label={`Remove section: ${section.title}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      {section.items.map((item, iIdx) => (
+                        <div key={item.id} className="ml-4 p-3 bg-muted/50 rounded-md space-y-3">
+                          <div className="flex items-start gap-2">
+                            <div className="flex-1 space-y-3">
+                              <div className="grid md:grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                  <Label>Item Name / Achievement</Label>
+                                  <Input
+                                    value={item.heading || ''}
+                                    onChange={(e) =>
+                                      updateOtherSectionItem(sIdx, iIdx, 'heading', e.target.value)
+                                    }
+                                    placeholder="e.g., Best Employee Award"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Date / Year</Label>
+                                  <Input
+                                    value={item.sub || ''}
+                                    onChange={(e) =>
+                                      updateOtherSectionItem(sIdx, iIdx, 'sub', e.target.value)
+                                    }
+                                    placeholder="e.g., 2024 or Jan 2024"
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label>Additional Info (optional)</Label>
+                                <Textarea
+                                  value={item.body || ''}
+                                  onChange={(e) =>
+                                    updateOtherSectionItem(sIdx, iIdx, 'body', e.target.value)
+                                  }
+                                  placeholder="Add any additional details, context, or description..."
+                                  rows={2}
+                                />
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label>Bullet Points (optional)</Label>
+                                {(item.bullets || []).map((bullet, bIdx) => (
+                                  <div key={bIdx} className="flex gap-2">
+                                    <Input
+                                      value={bullet}
+                                      onChange={(e) =>
+                                        updateOtherItemBullet(sIdx, iIdx, bIdx, e.target.value)
+                                      }
+                                      placeholder="Additional point..."
+                                      aria-label={`Bullet point ${bIdx + 1}`}
+                                    />
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      onClick={() => removeOtherItemBullet(sIdx, iIdx, bIdx)}
+                                      aria-label={`Remove bullet point ${bIdx + 1}`}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                ))}
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => addBulletToOtherItem(sIdx, iIdx)}
+                                >
+                                  <Plus className="h-3 w-3 mr-1" />
+                                  Add Bullet Point
+                                </Button>
+                              </div>
+                            </div>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => removeOtherSectionItem(sIdx, iIdx)}
+                              aria-label={`Remove item: ${item.heading || 'Untitled'}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => addOtherSectionItem(sIdx)}
+                        className="w-full"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add Item to {section.title || 'Section'}
+                      </Button>
+                    </div>
+                  ))}
+
+                  {(!activeDoc.otherSections || activeDoc.otherSections.length === 0) && (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No sections yet. Click "Add Section" to create a custom section.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Preview Panel */}
@@ -889,6 +1198,7 @@ export function Builder() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }

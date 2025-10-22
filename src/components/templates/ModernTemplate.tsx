@@ -340,6 +340,44 @@ export function ModernTemplate({ data, template }: TemplateProps) {
               ))}
             </>
           )}
+
+          {/* Others Sections */}
+          {data.otherSections && data.otherSections.length > 0 && template.sections.includes('others') && (
+            <>
+              {data.otherSections.map((section, sIdx) => (
+                <section key={section.id || sIdx} className="avoid-break">
+                  <h3
+                    className="text-base font-bold mb-3 pb-2 border-b-2 uppercase"
+                    style={{ color: primaryColor, borderColor: primaryColor }}
+                  >
+                    {section.title}
+                  </h3>
+                  <div className="space-y-3">
+                    {section.items.map((item, iIdx) => (
+                      <div key={item.id || iIdx} className="avoid-break">
+                        {item.heading && (
+                          <h4 className="font-bold text-gray-900 text-sm">{item.heading}</h4>
+                        )}
+                        {item.sub && (
+                          <p className="text-xs text-gray-600">{item.sub}</p>
+                        )}
+                        {item.body && (
+                          <p className="text-sm text-gray-700 mt-1">{item.body}</p>
+                        )}
+                        {item.bullets && item.bullets.length > 0 && (
+                          <ul className="list-disc list-inside space-y-0.5 text-sm text-gray-700 mt-1">
+                            {item.bullets.map((bullet, bIdx) => (
+                              <li key={bIdx}>{bullet}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -206,6 +206,35 @@ export function CompactSingleTemplate({ data, template }: TemplateProps) {
           ))}
         </>
       )}
+
+      {/* Others Sections */}
+      {data.otherSections && data.otherSections.length > 0 && template.sections.includes('others') && (
+        <>
+          {data.otherSections.map((section) => (
+            <section key={section.id} className="avoid-break mb-4">
+              <h2 className="text-sm font-bold mb-2 uppercase tracking-wide" style={{ color: primaryColor }}>
+                {section.title}
+              </h2>
+              <div className="space-y-2">
+                {section.items.map((item) => (
+                  <div key={item.id} className="avoid-break">
+                    {item.heading && <h3 className="font-semibold text-sm">{item.heading}</h3>}
+                    {item.sub && <p className="text-xs text-gray-600">{item.sub}</p>}
+                    {item.body && <p className="text-sm text-gray-700 mt-1">{item.body}</p>}
+                    {item.bullets && item.bullets.length > 0 && (
+                      <ul className="list-disc list-inside space-y-0.5 text-sm text-gray-700">
+                        {item.bullets.map((bullet, bidx) => (
+                          <li key={bidx} className="avoid-break">{bullet}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </>
+      )}
     </div>
   );
 }

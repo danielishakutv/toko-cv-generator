@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
@@ -12,6 +12,8 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { useAuthStore } from '@/stores/auth';
 import { useToast } from './ui/use-toast';
+import { Alert, AlertDescription } from './ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 interface AuthDialogProps {
   open: boolean;
@@ -25,14 +27,35 @@ export function AuthDialog({ open, onClose, mode: initialMode = 'signin', redire
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { signIn, signUp, redirectTo: storedRedirectTo, setRedirectTo } = useAuthStore();
+  const { 
+    signIn, 
+    signUp, 
+    redirectTo: storedRedirectTo, 
+    setRedirectTo, 
+    isLoading, 
+    error, 
+    clearError 
+  } = useAuthStore();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
+  // Clear error when dialog opens/closes or mode changes
+  useEffect(() => {
+    if (!open) {
+      clearError();
+      setName('');
+      setEmail('');
+      setPassword('');
+    }
+  }, [open, clearError]);
+
+  useEffect(() => {
+    clearError();
+  }, [mode, clearError]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    clearError();
 
     try {
       if (mode === 'signin') {
@@ -49,10 +72,9 @@ export function AuthDialog({ open, onClose, mode: initialMode = 'signin', redire
       const targetPath = redirectTo || storedRedirectTo || '/dashboard';
       setRedirectTo(null); // Clear stored redirect
       navigate(targetPath, { replace: true });
-    } catch (error) {
-      addToast('Something went wrong. Please try again.', 'error');
-    } finally {
-      setLoading(false);
+    } catch (error: any) {
+      // Error is already set in the store, just show toast
+      addToast(error.message || 'Something went wrong. Please try again.', 'error');
     }
   };
 
@@ -69,6 +91,13 @@ export function AuthDialog({ open, onClose, mode: initialMode = 'signin', redire
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
           {mode === 'signup' && (
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
@@ -79,6 +108,7 @@ export function AuthDialog({ open, onClose, mode: initialMode = 'signin', redire
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                disabled={isLoading}
               />
             </div>
           )}
@@ -92,6 +122,7 @@ export function AuthDialog({ open, onClose, mode: initialMode = 'signin', redire
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -105,11 +136,17 @@ export function AuthDialog({ open, onClose, mode: initialMode = 'signin', redire
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
+              disabled={isLoading}
             />
+            {mode === 'signup' && (
+              <p className="text-xs text-muted-foreground">
+                Minimum 6 characters
+              </p>
+            )}
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Please wait...' : mode === 'signin' ? 'Sign In' : 'Create Account'}
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Please wait...' : mode === 'signin' ? 'Sign In' : 'Create Account'}
           </Button>
 
           <div className="text-center text-sm">
